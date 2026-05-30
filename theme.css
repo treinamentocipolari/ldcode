@@ -1,0 +1,232 @@
+/* ============== LDCODE — Tema claro/escuro + adaptação ==============
+   O site é escuro por padrão. Com [data-theme="light"] no <html>, vira claro.
+   A escolha é lembrada no navegador (ver app.js). */
+
+/* ---------- Botão de tema ---------- */
+.theme-toggle{
+  width:42px;height:42px;border-radius:12px;flex:0 0 auto;
+  border:1px solid var(--line-2);background:rgba(255,255,255,.04);color:var(--ink);
+  display:grid;place-items:center;cursor:pointer;transition:.25s;
+}
+.theme-toggle:hover{border-color:var(--cyan);background:rgba(31,208,232,.1);transform:translateY(-1px)}
+.theme-toggle svg{width:19px;height:19px}
+.theme-toggle .i-moon{display:none}
+.theme-toggle .i-sun{display:block}
+[data-theme="light"] .theme-toggle{color:var(--ink)}
+[data-theme="light"] .theme-toggle .i-sun{display:none}
+[data-theme="light"] .theme-toggle .i-moon{display:block}
+.nav.scrolled .theme-toggle{width:40px;height:40px}
+
+/* botão de tema dentro do menu mobile */
+.mobile-menu .theme-row{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:14px 12px;border-radius:12px;border:1px solid var(--line);margin-top:6px;
+}
+.mobile-menu .theme-row span{font-family:var(--font-head);font-weight:600;font-size:16px}
+
+/* =================================================================
+   TEMA CLARO
+   ================================================================= */
+[data-theme="light"]{
+  --bg:#eef1f8;
+  --bg-2:#ffffff;
+  --bg-3:#e6eaf4;
+  --ink:#101633;
+  --muted:#4c5474;
+  --muted-2:#878fac;
+  --line:rgba(16,22,51,.10);
+  --line-2:rgba(16,22,51,.17);
+
+  --blue:#1f63e6; --blue-2:#2d76ff;
+  --cyan:#0e93c4; --violet:#7a37e6; --violet-2:#8b4dff;
+
+  --grad:linear-gradient(105deg,#1f63e6 0%,#119bc7 50%,#7a37e6 100%);
+  --grad-soft:linear-gradient(105deg,rgba(31,99,230,.12),rgba(17,155,199,.10),rgba(122,55,230,.12));
+  --glow-blue:0 0 28px rgba(31,99,230,.25);
+}
+[data-theme="light"] body{background:var(--bg);color:var(--ink)}
+
+/* superfícies de vidro -> claro */
+[data-theme="light"] .card,
+[data-theme="light"] .stat,
+[data-theme="light"] .step,
+[data-theme="light"] .test{
+  background:linear-gradient(180deg,#ffffff,#fbfcff);
+  box-shadow:0 10px 26px -18px rgba(16,22,51,.35);
+}
+[data-theme="light"] .faq-item{background:#fff}
+[data-theme="light"] .guarantee{background:radial-gradient(ellipse at 20% 0%,rgba(31,99,230,.12),transparent 60%),#fff}
+[data-theme="light"] .form{background:rgba(255,255,255,.92);box-shadow:0 12px 30px -18px rgba(16,22,51,.4)}
+[data-theme="light"] .hero-badge{background:#fff}
+[data-theme="light"] .btn-ghost{background:#fff;color:var(--ink)}
+[data-theme="light"] .nav-toggle{background:#fff}
+[data-theme="light"] .slider-arrows button{background:#fff}
+[data-theme="light"] .banner-arrow{background:rgba(255,255,255,.78);color:var(--ink)}
+[data-theme="light"] .hero-logo-stage{background:radial-gradient(ellipse at 50% 35%,rgba(31,99,230,.13),transparent 70%),#fff}
+
+/* nav / barras */
+[data-theme="light"] .nav.scrolled{background:rgba(255,255,255,.82);border-bottom-color:var(--line)}
+[data-theme="light"] .brand .wordmark{color:var(--ink)}
+[data-theme="light"] .trust{background:var(--bg-2)}
+[data-theme="light"] .footer{background:var(--bg-2)}
+[data-theme="light"] .mobile-menu{background:var(--bg-2)}
+[data-theme="light"] .trust .marks span,[data-theme="light"] .trust .marks .mark-link{color:rgba(16,22,51,.42)}
+[data-theme="light"] .trust .marks a.mark-link[href]:hover{color:#0e7ea6}
+
+/* CTA final */
+[data-theme="light"] .cta-box{background:linear-gradient(135deg,rgba(31,99,230,.12),rgba(17,155,199,.07),rgba(122,55,230,.12))}
+[data-theme="light"] .cta-box p{color:var(--muted)}
+
+/* acentos antes muito claros -> mais escuros pra ter contraste no branco */
+[data-theme="light"] .eyebrow{color:#0e7ea6}
+[data-theme="light"] .card .ico,
+[data-theme="light"] .mini .dotc{color:#1f63e6}
+[data-theme="light"] .port-card .meta .cat,
+[data-theme="light"] .shop-item .si-info .pr{color:#0e7ea6}
+
+/* slider dots */
+[data-theme="light"] .slider-dots button{background:rgba(16,22,51,.16)}
+
+/* fundo ambiente mais suave no claro */
+[data-theme="light"] .orb{opacity:.22}
+[data-theme="light"] #hero-canvas{opacity:.5}
+[data-theme="light"] .promo-track{box-shadow:0 24px 60px -34px rgba(31,99,230,.4)}
+
+/* OBS: as “telinhas” de demonstração (mock de site, celular, busca do
+   Google e painel) continuam escuras de propósito — representam telas
+   de produto, então ficam bonitas nos dois temas. */
+
+/* =================================================================
+   ADAPTAÇÃO — celular / tablet / desktop
+   ================================================================= */
+
+/* tablet (retrato) e telas médias */
+@media(max-width:880px){
+  .section{padding:88px 0}
+  .nav .wrap{gap:12px}
+  .banner-text-col .slider-ui{margin-top:20px}
+}
+
+/* deixa o toque confortável no mobile */
+@media(max-width:680px){
+  .theme-toggle{width:44px;height:44px}
+  .nav-cta{gap:10px}
+  .hero-actions .btn,.cta-box .btn{width:100%}
+  .hero-actions{width:100%}
+  .feat .lead2,.section-head p{font-size:16px}
+  .guarantee .seal{width:96px;height:96px;font-size:14px}
+}
+
+/* telas bem pequenas */
+@media(max-width:400px){
+  .wrap{padding:0 16px}
+  .banner h1{font-size:clamp(30px,9vw,40px)}
+  .hero-proof{font-size:13px}
+  .promo-slide{height:clamp(120px,44vw,200px)}
+}
+
+/* =================================================================
+   CHAT FLUTUANTE estilo WhatsApp
+   ================================================================= */
+.wa-float .wa-ic-close{display:none;width:26px;height:26px}
+.wa-float.open .wa-ic-chat{display:none}
+.wa-float.open .wa-ic-close{display:block}
+.wa-float.open .ping{display:none}
+
+.wa-chat{
+  position:fixed;right:22px;bottom:94px;z-index:71;width:360px;max-width:calc(100vw - 32px);
+  height:520px;max-height:calc(100vh - 130px);
+  display:flex;flex-direction:column;overflow:hidden;border-radius:18px;
+  background:#0b141a;border:1px solid rgba(255,255,255,.08);
+  box-shadow:0 24px 60px rgba(0,0,0,.5);
+  transform:translateY(24px) scale(.96);transform-origin:bottom right;
+  opacity:0;pointer-events:none;transition:transform .28s cubic-bezier(.2,.9,.3,1),opacity .28s;
+}
+.wa-chat.open{transform:none;opacity:1;pointer-events:auto}
+
+/* cabeçalho */
+.wa-chat-head{display:flex;align-items:center;gap:12px;padding:13px 14px;background:#1f2c34;flex:0 0 auto}
+.wa-avatar{width:42px;height:42px;border-radius:50%;flex:0 0 auto;background:linear-gradient(135deg,#25d366,#128c5e);display:grid;place-items:center}
+.wa-avatar svg{width:24px;height:24px}
+.wa-id{flex:1;min-width:0;color:#e9edef}
+.wa-id b{display:block;font-family:var(--font-head);font-size:15px;line-height:1.2}
+.wa-id span{display:flex;align-items:center;gap:6px;font-size:12px;color:#8696a0}
+.wa-on{width:7px;height:7px;border-radius:50%;background:#25d366;display:inline-block}
+.wa-x{width:34px;height:34px;border-radius:9px;border:none;background:transparent;color:#aebac1;display:grid;place-items:center;cursor:pointer;transition:.2s}
+.wa-x:hover{background:rgba(255,255,255,.08);color:#fff}
+.wa-x svg{width:18px;height:18px}
+
+/* corpo de mensagens */
+.wa-body{
+  flex:1;overflow-y:auto;padding:18px 14px;display:flex;flex-direction:column;gap:8px;
+  background:#0b141a url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cg fill='%23ffffff' fill-opacity='0.022'%3E%3Ccircle cx='10' cy='10' r='2'/%3E%3Ccircle cx='40' cy='30' r='2'/%3E%3Ccircle cx='20' cy='50' r='2'/%3E%3C/g%3E%3C/svg%3E");
+}
+.wa-body::-webkit-scrollbar{width:6px}
+.wa-body::-webkit-scrollbar-thumb{background:rgba(255,255,255,.14);border-radius:3px}
+.wa-day{align-self:center;font-size:11px;color:#8696a0;background:rgba(31,44,52,.85);padding:4px 12px;border-radius:8px;margin-bottom:6px}
+.wa-msg{max-width:80%;padding:7px 10px 5px;border-radius:9px;font-size:14px;line-height:1.4;position:relative;animation:waPop .25s ease}
+.wa-msg p{margin:0;color:#e9edef}
+.wa-msg.in{align-self:flex-start;background:#1f2c34;border-top-left-radius:3px}
+.wa-msg.out{align-self:flex-end;background:#005c4b;border-top-right-radius:3px}
+.wa-msg.out p{color:#e9f7ef}
+.wa-time{display:block;text-align:right;font-size:10px;color:#8696a0;margin-top:2px}
+.wa-msg.out .wa-time{color:#a7d3c6}
+@keyframes waPop{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.wa-typing{align-self:flex-start;background:#1f2c34;border-radius:9px;border-top-left-radius:3px;padding:11px 14px;display:flex;gap:4px}
+.wa-typing i{width:7px;height:7px;border-radius:50%;background:#8696a0;animation:waBlink 1.2s infinite}
+.wa-typing i:nth-child(2){animation-delay:.2s}
+.wa-typing i:nth-child(3){animation-delay:.4s}
+@keyframes waBlink{0%,60%,100%{opacity:.3}30%{opacity:1}}
+
+/* respostas rápidas */
+.wa-quick{display:flex;gap:7px;flex-wrap:wrap;padding:10px 12px;background:#0b141a;border-top:1px solid rgba(255,255,255,.06);flex:0 0 auto}
+.wa-quick button{font-family:var(--font-body);font-size:12.5px;color:#25d366;background:rgba(37,211,102,.12);border:1px solid rgba(37,211,102,.3);border-radius:999px;padding:6px 12px;cursor:pointer;transition:.18s}
+.wa-quick button:hover{background:rgba(37,211,102,.22)}
+.wa-quick button.wa-go{background:#25d366;color:#0b141a;font-weight:600;border-color:#25d366}
+.wa-quick button.wa-go:hover{background:#22c35e}
+
+/* =================================================================
+   EFEITOS REFINADOS
+   ================================================================= */
+
+/* luz que segue o cursor dentro dos cards / passos */
+.card > *{position:relative;z-index:1}
+.card::after{
+  content:"";position:absolute;inset:0;border-radius:inherit;z-index:0;opacity:0;
+  transition:opacity .45s;pointer-events:none;
+  background:radial-gradient(420px circle at var(--mx,50%) var(--my,50%),rgba(31,208,232,.16),transparent 62%);
+}
+.card:hover::after{opacity:1}
+[data-theme="light"] .card::after{background:radial-gradient(420px circle at var(--mx,50%) var(--my,50%),rgba(31,99,230,.12),transparent 62%)}
+
+/* brilho que percorre os botões principais */
+.btn-primary{position:relative;overflow:hidden}
+.btn-primary > *{position:relative;z-index:1}
+.btn-primary::after{
+  content:"";position:absolute;top:0;left:-130%;width:55%;height:100%;z-index:0;
+  background:linear-gradient(100deg,transparent,rgba(255,255,255,.38),transparent);
+  transform:skewX(-18deg);transition:left .7s cubic-bezier(.22,.61,.36,1);pointer-events:none;
+}
+.btn-primary:hover::after{left:140%}
+
+/* logo do topo: leve inclinação 3D acompanhando o mouse (via JS) */
+.hero-logo-stage{transition:transform .25s ease-out;transform-style:preserve-3d;will-change:transform}
+.hero-logo-stage img{transition:transform .25s ease-out}
+
+/* respeita quem prefere menos movimento */
+@media(prefers-reduced-motion:reduce){
+  .hero-logo-stage,.hero-logo-stage img,.btn-primary::after{transition:none}
+  .wa-float{animation:none}
+}
+
+/* campo de digitar */
+.wa-input{display:flex;align-items:center;gap:9px;padding:10px 12px;background:#1f2c34;flex:0 0 auto}
+.wa-input input{flex:1;background:#2a3942;border:none;outline:none;color:#e9edef;font-family:var(--font-body);font-size:14px;padding:11px 14px;border-radius:999px}
+.wa-input input::placeholder{color:#8696a0}
+.wa-input button{width:44px;height:44px;flex:0 0 auto;border:none;border-radius:50%;background:#25d366;color:#0b141a;display:grid;place-items:center;cursor:pointer;transition:.2s}
+.wa-input button:hover{background:#22c35e;transform:scale(1.05)}
+.wa-input button svg{width:20px;height:20px}
+
+@media(max-width:480px){
+  .wa-chat{right:12px;left:12px;width:auto;bottom:88px;height:calc(100vh - 120px)}
+}
