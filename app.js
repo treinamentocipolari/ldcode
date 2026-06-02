@@ -2,8 +2,9 @@
 (function () {
   'use strict';
 
-  /* Número do WhatsApp — vem do painel (CMS). Edite em Configurações. */
+  /* Número do WhatsApp — vem do painel (CMS). Usado só no formulário de lead. */
   var WHATSAPP = (window.LDCMS && window.LDCMS.get('whatsapp')) || '5500000000000';
+  function waLink(text) { return 'https://wa.me/' + WHATSAPP + '?text=' + encodeURIComponent(text); }
 
   /* ---------- Tema claro/escuro ---------- */
   (function () {
@@ -100,8 +101,10 @@
     });
   });
 
-  /* ---------- WhatsApp: botão flutuante arrastável + chat ---------- */
-  function waLink(text) { return 'https://wa.me/' + WHATSAPP + '?text=' + encodeURIComponent(text); }
+  /* ====================================================================
+     LIVE CHAT EM TEMPO REAL (Socket.io) — substitui o antigo bot estático
+     O design e a marcação do #waChat / #waFloat permanecem intactos.
+     ==================================================================== */
   (function () {
     var fab = document.getElementById('waFloat');
     var chat = document.getElementById('waChat');
@@ -111,6 +114,11 @@
     var quick = document.getElementById('waQuick');
     var closeBtn = document.getElementById('waClose');
     if (!fab || !chat) return;
+
+    /* URL do servidor de chat. Local = mesma máquina; produção = seu domínio. */
+    var CHAT_SERVER = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+      ? 'http://localhost:3000'
+      : 'https://SEU-DOMINIO-DO-CHAT.com.br';   // <-- troque em produção
 
     /* ===== arrastar o botão ===== */
     var FAB = 60, M = 12, dragging = false, moved = false, sx, sy, ox, oy;
@@ -125,8 +133,8 @@
       positionChat();
     }
     try {
-      var saved = JSON.parse(localStorage.getItem('ldcode_wa_pos') || 'null');
-      if (saved && typeof saved.left === 'number') placeFab(saved.left, saved.top);
+      var savedPos = JSON.parse(localStorage.getItem('ldcode_wa_pos') || 'null');
+      if (savedPos && typeof savedPos.left === 'number') placeFab(savedPos.left, savedPos.top);
     } catch (e) {}
 
     fab.addEventListener('pointerdown', function (e) {
@@ -141,7 +149,7 @@
       if (!moved && Math.abs(dx) + Math.abs(dy) > 5) { moved = true; fab.classList.add('dragging'); }
       if (moved) placeFab(ox + dx, oy + dy);
     });
-    function endDrag(e) {
+    function endDrag() {
       if (!dragging) return;
       dragging = false;
       fab.classList.remove('dragging');
@@ -152,7 +160,7 @@
     }
     fab.addEventListener('pointerup', function (e) {
       var wasMoved = moved;
-      endDrag(e);
+      endDrag();
       if (!wasMoved) toggle();           // clique simples (não arrastou) -> abre/fecha
     });
     fab.addEventListener('pointercancel', endDrag);
@@ -168,10 +176,8 @@
       var r = fab.getBoundingClientRect();
       var cw = chat.offsetWidth || 360, chh = chat.offsetHeight || 520;
       var center = r.left + r.width / 2;
-      // horizontal: alinha o chat ao lado do botão, dentro da tela
       var left = (center > window.innerWidth / 2) ? (r.right - cw) : r.left;
       left = clamp(left, M, window.innerWidth - cw - M);
-      // vertical: prefere acima do botão; se não couber, abaixo
       var top = r.top - chh - 12;
       if (top < M) top = Math.min(r.bottom + 12, window.innerHeight - chh - M);
       top = clamp(top, M, window.innerHeight - chh - M);
@@ -209,105 +215,90 @@
       body.scrollTop = body.scrollHeight;
       return m;
     }
-    function typingThen(cb, delay) {
-      var t = document.createElement('div');
-      t.className = 'wa-typing';
-      t.innerHTML = '<i></i><i></i><i></i>';
-      body.appendChild(t);
-      body.scrollTop = body.scrollHeight;
-      setTimeout(function () { t.remove(); cb(); }, delay || 1000);
-    }
+    function escapeHtml(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
     function setQuick(options) {
       quick.innerHTML = '';
-      options.forEach(function (o) {
+      (options || []).forEach(function (o) {
         var b = document.createElement('button');
         b.textContent = o;
         quick.appendChild(b);
       });
-      quick.style.display = options.length ? '' : 'none';
+      quick.style.display = (options && options.length) ? '' : 'none';
     }
 
-    /* ===== bot: respostas que mantêm a conversa ===== */
-    function escapeHtml(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
-    function botReply(textRaw) {
-      var t = textRaw.toLowerCase();
-      function has() { for (var i = 0; i < arguments.length; i++) if (t.indexOf(arguments[i]) > -1) return true; return false; }
+    var typingEl = null;
+    function showTyping() {
+      if (typingEl) return;
+      typingEl = document.createElement('div');
+      typingEl.className = 'wa-typing';
+      typingEl.innerHTML = '<i></i><i></i><i></i>';
+      body.appendChild(typingEl);
+      body.scrollTop = body.scrollHeight;
+    }
+    function hideTyping() { if (typingEl) { typingEl.remove(); typingEl = null; } }
 
-      if (has('site')) return {
-        msg: 'Ótimo! Um <b>site profissional</b> deixa seu negócio com cara de grande e passa confiança. 💻<br><br>Ele costuma ficar pronto em poucos dias. Quer que eu te passe um orçamento sem compromisso?',
-        quick: ['Sim, quero orçamento', 'Quanto custa?', 'Ver exemplos']
-      };
-      if (has('loja', 'vender online', 'e-commerce', 'ecommerce')) return {
-        msg: 'Show! Com uma <b>loja online</b> você vende 24h por dia, com Pix, cartão e entrega. 🛒<br><br>Os pedidos caem direto no seu WhatsApp. Quer um orçamento?',
-        quick: ['Sim, quero orçamento', 'Quanto custa?', 'Como funciona?']
-      };
-      if (has('google', 'aparecer', 'busca')) return {
-        msg: 'Perfeito! A gente coloca seu negócio pra <b>aparecer no Google</b> quando procurarem o que você vende na sua região. 📍<br><br>Mais visitas e mais ligações todo dia. Quer saber como começar?',
-        quick: ['Sim, quero começar', 'Quanto custa?']
-      };
-      if (has('preço', 'preco', 'valor', 'custa', 'quanto', 'orçamento', 'orcamento')) return {
-        msg: 'O valor depende do que o seu negócio precisa — por isso o <b>orçamento é gratuito</b> e combinado antes, sem surpresa. 💰<br><br>Me conta: qual o seu nome e o tipo do seu negócio?',
-        quick: ['Falar com atendente']
-      };
-      if (has('prazo', 'tempo', 'demora', 'quando')) return {
-        msg: 'Sites e cardápios digitais costumam ficar prontos em <b>poucos dias</b>. ⏱️ Projetos maiores têm um prazo combinado já na primeira conversa.',
-        quick: ['Quero começar', 'Falar com atendente']
-      };
-      if (has('atendente', 'humano', 'pessoa', 'falar com')) return {
-        msg: 'Claro! Posso te encaminhar pro nosso <b>atendimento no WhatsApp</b> pra falar com uma pessoa de verdade. É só tocar no botão abaixo. 👇',
-        quick: ['__wa__Abrir o WhatsApp'],
-        wa: true
-      };
-      if (has('oi', 'olá', 'ola', 'bom dia', 'boa tarde', 'boa noite')) return {
-        msg: 'Oi! 😊 Que bom te ver por aqui. Me conta o que você procura pro seu negócio:',
-        quick: ['Quero um site', 'Quero uma loja online', 'Aparecer no Google']
-      };
-      if (has('obrigad', 'valeu', 'show', 'ótimo', 'otimo')) return {
-        msg: 'Imagina! 💚 Se quiser, posso te passar pro WhatsApp pra continuarmos com mais detalhes.',
-        quick: ['__wa__Continuar no WhatsApp', 'Tenho outra dúvida'],
-        wa: true
-      };
-      return {
-        msg: 'Entendi! 👍 Pra te ajudar melhor, me conta um pouquinho mais — ou escolha uma das opções abaixo:',
-        quick: ['Quero um site', 'Quero uma loja online', 'Aparecer no Google', 'Falar com atendente']
-      };
+    /* ===== conexão Socket.io ===== */
+    if (typeof io === 'undefined') {
+      console.error('[LDCODE] Socket.io não carregado. Adicione o <script> do cliente no index.html.');
+      return;
     }
 
+    /* sessionId persistente: o visitante não perde a conversa ao recarregar */
+    var sessionId;
+    try { sessionId = localStorage.getItem('ldcode_chat_sid'); } catch (e) {}
+    if (!sessionId) {
+      sessionId = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+      try { localStorage.setItem('ldcode_chat_sid', sessionId); } catch (e) {}
+    }
+
+    var socket = io(CHAT_SERVER, { transports: ['websocket', 'polling'] });
+    var historyLoaded = false;
+
+    socket.on('connect', function () {
+      socket.emit('visitor:join', { sessionId: sessionId });
+    });
+
+    /* histórico salvo: recria a conversa anterior (uma única vez) */
+    socket.on('visitor:history', function (messages) {
+      if (historyLoaded) return;
+      historyLoaded = true;
+      if (messages && messages.length) {
+        setQuick([]); // já conversou antes -> esconde os botões iniciais
+        messages.forEach(function (m) {
+          addMsg(m.text.replace(/\n/g, '<br>'), m.from === 'admin' ? 'in' : 'out');
+        });
+      }
+    });
+
+    /* resposta do atendente chega em tempo real */
+    socket.on('visitor:message', function (m) {
+      hideTyping();
+      addMsg(m.text.replace(/\n/g, '<br>'), 'in');
+    });
+
+    /* atendente está digitando */
+    socket.on('visitor:typing', function () {
+      showTyping();
+      clearTimeout(showTyping._t);
+      showTyping._t = setTimeout(hideTyping, 4000);
+    });
+
+    /* ===== envio do visitante ===== */
     function handle(text) {
       text = (text || '').trim();
       if (!text) return;
-      addMsg(escapeHtml(text), 'out');
+      addMsg(escapeHtml(text), 'out');     // mostra imediatamente
       input.value = '';
       setQuick([]);
-      typingThen(function () {
-        var r = botReply(text);
-        addMsg(r.msg, 'in');
-        setQuick(r.quick || []);
-      }, 1000 + Math.random() * 600);
+      socket.emit('visitor:message', { text: text });
     }
 
     form.addEventListener('submit', function (e) { e.preventDefault(); handle(input.value); });
+    input.addEventListener('input', function () { socket.emit('visitor:typing'); });
     quick.addEventListener('click', function (e) {
       var b = e.target.closest('button'); if (!b) return;
-      var label = b.textContent;
-      if (label.indexOf('__wa__') === 0 || b.dataset.wa) {
-        // botão de handoff: abre o WhatsApp real
-        window.open(waLink('Olá! Vim pelo site da LDCODE e quero falar com um atendente.'), '_blank', 'noopener');
-        return;
-      }
-      handle(label);
+      handle(b.textContent);
     });
-    // marca botões de WhatsApp (texto com prefixo __wa__) e limpa o rótulo
-    var qObserver = new MutationObserver(function () {
-      [].forEach.call(quick.querySelectorAll('button'), function (b) {
-        if (b.textContent.indexOf('__wa__') === 0) {
-          b.dataset.wa = '1';
-          b.classList.add('wa-go');
-          b.textContent = b.textContent.replace('__wa__', '');
-        }
-      });
-    });
-    qObserver.observe(quick, { childList: true });
   })();
 
   /* ---------- Formulário -> WhatsApp ---------- */
@@ -522,7 +513,7 @@
       var stage = document.querySelector('.hero-logo-stage');
       var img = stage && stage.querySelector('img');
       if (stage) {
-        var raf = null, tx = 0, ty = 0;
+        var raf = null;
         stage.addEventListener('pointermove', function (e) {
           var r = stage.getBoundingClientRect();
           var px = (e.clientX - r.left) / r.width - 0.5;   // -0.5..0.5

@@ -1,0 +1,10 @@
+# Dependências
+node_modules/
+
+# Histórico do chat (gerado em runtime)
+chat-data.json
+
+# Logs / ambiente
+npm-debug.log*
+.env
+.DS_Store
