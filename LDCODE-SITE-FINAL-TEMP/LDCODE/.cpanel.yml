@@ -1,0 +1,20 @@
+---
+deployment:
+  tasks:
+    # Caminho da pasta do site no cPanel (HostGator).
+    # Confirme em "Git Version Control" se for diferente.
+    - export DEPLOYPATH=/home1/luizda54/ldcodepro.com.br
+    # Copia os arquivos do SITE (estatico) para a pasta do site.
+    # O server.js / package.json NAO sao copiados: o chat roda no Render, nao no Turbo.
+    - /bin/cp index.html        $DEPLOYPATH/
+    - /bin/cp app.js            $DEPLOYPATH/
+    - /bin/cp cms.js            $DEPLOYPATH/
+    - /bin/cp image-slot.js     $DEPLOYPATH/
+    - /bin/cp admin.js          $DEPLOYPATH/
+    - /bin/cp styles.css        $DEPLOYPATH/
+    - /bin/cp extra.css         $DEPLOYPATH/
+    - /bin/cp theme.css         $DEPLOYPATH/
+    - /bin/cp admin.css         $DEPLOYPATH/
+    - /bin/cp painel-admin.html $DEPLOYPATH/
+    - /bin/cp painel-chat.html  $DEPLOYPATH/
+    - /bin/cp -R assets         $DEPLOYPATH/

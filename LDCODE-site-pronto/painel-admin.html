@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LDCODE — Painel do Site</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="admin.css">
+<script>(function(){try{if(localStorage.getItem('ldcode_theme')==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}})();</script>
+</head>
+<body>
+
+<div class="app-bg"><div class="orb o1"></div><div class="orb o2"></div><div class="grid"></div></div>
+
+<div class="layout">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-brand">
+      <img src="assets/logo-ldcode.png" alt="LDCODE">
+      <div class="tag"><b>Painel do site</b>ldcode.com.br</div>
+    </div>
+    <nav class="sb-nav" id="sbNav">
+      <div class="sb-group">Atendimento</div>
+      <button class="sb-link" id="btnChatLive">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="18" height="18"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <span>Chat ao Vivo</span>
+        <span class="badge" id="chatBadge" style="display:none; margin-left:auto; background:var(--cyan); color:#000;">0</span>
+      </button>
+      <div class="sb-group" style="margin-top: 16px;">Conteúdo do site</div>
+      <!-- links gerados pelo admin.js -->
+    </nav>
+    <div class="sb-foot">
+      <div class="sb-user">
+        <span class="av">LD</span>
+        <div class="info"><b>LDCODE</b><span>Administrador</span></div>
+        <a href="index.html" target="_blank" class="out" title="Abrir o site" aria-label="Abrir o site">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6M10 14 21 3"/></svg>
+        </a>
+      </div>
+    </div>
+  </aside>
+  <div class="sb-scrim" id="sbScrim"></div>
+
+  <!-- ============ MAIN ============ -->
+  <div class="main">
+    <header class="topbar">
+      <button class="icon-btn menu-btn" id="menuBtn" aria-label="Menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+      </button>
+      <div class="tb-title">
+        <div class="crumb">Conteúdo do site</div>
+        <h1 id="pageTitle">Topo do site</h1>
+      </div>
+      <div class="tb-actions">
+        <button class="theme-toggle" id="themeToggle" aria-label="Alternar tema" title="Alternar tema">
+          <svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="4.5"/><path d="M12 1v3M12 20v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M1 12h3M20 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>
+          <svg class="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg>
+        </button>
+        <a href="index.html" target="_blank" class="btn btn-ghost btn-sm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>Ver o site</a>
+        <button class="btn btn-primary btn-sm" id="publishBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 13l4 4L19 7"/></svg>Publicar alterações</button>
+      </div>
+    </header>
+
+    <div class="content">
+      <section class="view

@@ -118,7 +118,7 @@
     /* URL do servidor de chat. Local = mesma máquina; produção = seu domínio. */
     var CHAT_SERVER = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
       ? 'http://localhost:3000'
-      : 'https://SEU-DOMINIO-DO-CHAT.com.br';   // <-- troque em produção
+      : 'https://ldcodepro.com.br';   // <-- Atualizado com seu domínio real
 
     /* ===== arrastar o botão ===== */
     var FAB = 60, M = 12, dragging = false, moved = false, sx, sy, ox, oy;
