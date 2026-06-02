@@ -1,0 +1,41 @@
+name: Deploy HostGator via FTP
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  web-deploy:
+    name: 🎉 Deploy to HostGator
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🚚 Obter arquivos
+        uses: actions/checkout@v4
+
+      - name: 📂 Preparar arquivos
+        run: |
+          mkdir dist
+          cp index.html dist/
+          cp app.js dist/
+          cp cms.js dist/
+          cp image-slot.js dist/
+          cp admin.js dist/
+          cp styles.css dist/
+          cp extra.css dist/
+          cp theme.css dist/
+          cp admin.css dist/
+          cp painel-admin.html dist/
+          cp painel-chat.html dist/
+          cp -R assets dist/
+
+      - name: 🚀 FTP Deploy
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ./dist/
+          server-dir: ./
+          # Se os arquivos estiverem em uma subpasta na HostGator (ex: public_html), altere o server-dir para:
+          # server-dir: public_html/
