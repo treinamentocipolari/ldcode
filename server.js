@@ -23,6 +23,22 @@ const DATA_FILE = path.join(__dirname, 'chat-data.json');
 const MAX_MSGS_PER_SESSION = 100;   // limite de histórico por visitante
 const SESSION_TTL_MS = 1000 * 60 * 60 * 24 * 3; // limpa sessões com +3 dias sem atividade
 
+/* --- Telegram Bot --- */
+// Cole as credenciais aqui depois de criar o bot no Telegram
+const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '8765973827:AAG1Bsq36bCENme9jDVEA7Q0_nr-q6Vwxbs';
+const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID || '8530466354';
+
+function notifyTelegram(visitorName, text) {
+  if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) return;
+  const https = require('https');
+  const message = `🔔 *Novo Cliente no Site!*\n\n*${visitorName}:* ${text}\n\nAbra o painel para responder: http://seusite.com/painel-admin.html`;
+  const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage?chat_id=${TELEGRAM_CHAT_ID}&parse_mode=Markdown&text=${encodeURIComponent(message)}`;
+  
+  https.get(url, (res) => {}).on('error', (e) => {
+    console.error('Erro ao notificar Telegram:', e.message);
+  });
+}
+
 /* ----------------------- App / IO ---------------------- */
 const app = express();
 app.use(cors());
@@ -198,6 +214,12 @@ io.on('connection', (socket) => {
     // confirma para o próprio visitante (eco) e avisa os admins
     socket.emit('visitor:sent', msg);
     adminSockets.forEach(id => io.to(id).emit('admin:message', { sessionId, message: msg }));
+    
+    // Notifica no Telegram
+    if (adminSockets.size === 0 || s.unread === 1) {
+      notifyTelegram(s.name, text);
+    }
+
     broadcastSessions();
   });
 

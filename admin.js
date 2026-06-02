@@ -115,6 +115,27 @@
   }
 
   /* ================= navegação ================= */
+  var btnChat = $('#btnChatLive');
+  if (btnChat) {
+    btnChat.addEventListener('click', function () {
+      $$('.sb-link').forEach(function (b) { b.classList.toggle('active', b === btnChat); });
+      $$('.view').forEach(function (v) { v.classList.toggle('active', v.id === 'view-chat-live'); });
+      $('#pageTitle').textContent = 'Chat ao Vivo';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      closeSidebar();
+    });
+
+    window.addEventListener('message', function (e) {
+      if (e.data && e.data.type === 'chat_unread') {
+        var b = $('#chatBadge');
+        if (b) {
+          b.textContent = e.data.count;
+          b.style.display = e.data.count > 0 ? '' : 'none';
+        }
+      }
+    });
+  }
+
   function goto(id) {
     $$('.sb-link').forEach(function (b) { b.classList.toggle('active', b.dataset.view === id); });
     $$('.view').forEach(function (v) { v.classList.toggle('active', v.id === 'view-' + id); });

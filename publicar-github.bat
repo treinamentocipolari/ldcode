@@ -33,13 +33,19 @@ if errorlevel 1 (
   exit /b 1
 )
 
+REM Remove trava de git pendente, se existir
+if exist ".git\index.lock" (
+  echo Removendo trava antiga do Git...
+  del /f /q ".git\index.lock"
+)
+
 REM Descobre o branch atual ^(main ou master^)
 for /f "delims=" %%b in ('git rev-parse --abbrev-ref HEAD') do set BRANCH=%%b
 echo Branch atual: %BRANCH%
 echo.
 
 echo Adicionando arquivos...
-git add app.js index.html server.js package.json painel-chat.html .gitignore INSTRUCOES.md
+git add app.js index.html server.js package.json painel-chat.html .gitignore INSTRUCOES.md app-chat-block.js publicar-github.bat
 
 echo.
 echo Criando commit...
