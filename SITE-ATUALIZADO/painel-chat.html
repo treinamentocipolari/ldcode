@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LDCODE — Central de Atendimento</title>
+<style>
+  :root{
+    --bg:#0b0f1a; --panel:#111726; --panel2:#0e1421; --line:rgba(255,255,255,.08);
+    --txt:#e8edf6; --muted:#8a95ac; --cyan:#1fd0e8; --blue:#2b7fff; --violet:#8b4dff;
+    --green:#37e6a4; --in:#1a2233; --out:#1f6feb;
+    --grad:linear-gradient(135deg,#2b7fff,#1fd0e8 55%,#8b4dff);
+    --font:'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{margin:0;font-family:var(--font);background:var(--bg);color:var(--txt);overflow:hidden}
+  .app{display:grid;grid-template-columns:320px 1fr;height:100vh}
+
+  /* ----- topo / sidebar ----- */
+  .side{background:var(--panel2);border-right:1px solid var(--line);display:flex;flex-direction:column;min-height:0}
+  .brand{display:flex;align-items:center;gap:10px;padding:18px 18px 14px}
+  .brand .wm{font-size:20px;font-weight:800;letter-spacing:.5px}
+  .brand .wm span{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .brand .tag{font-size:11px;color:var(--muted);margin-left:auto;display:flex;align-items:center;gap:6px}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 10px var(--green)}
+  .dot.off{background:#5a6478;box-shadow:none}
+
+  .search{padding:0 14px 12px}
+  .search input{width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--line);
+    background:var(--panel);color:var(--txt);font-size:14px;outline:none}
+  .search input:focus{border-color:var(--blue)}
+
+  .list-head{padding:6px 18px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--muted)}
+  .sessions{flex:1;overflow-y:auto;min-height:0}
+  .sess{display:flex;gap:12px;align-items:center;padding:12px 16px;cursor:pointer;border-bottom:1px solid var(--line);transition:.15s}
+  .sess:hover{background:rgba(255,255,255,.03)}
+  .sess.active{background:rgba(43,127,255,.12);border-left:3px solid var(--blue);padding-left:13px}
+  .av{width:42px;height:42px;border-radius:50%;background:var(--grad);display:grid;place-items:center;
+    font-weight:700;color:#fff;flex:none;font-size:15px;position:relative}
+  .av .pin{position:absolute;right:-1px;bottom:-1px;width:12px;height:12px;border-radius:50%;
+    background:#5a6478;border:2px solid var(--panel2)}
+  .av .pin.on{background:var(--green)}
+  .sess-info{flex:1;min-width:0}
+  .sess-info .n{font-weight:600;font-size:14px;display:flex;justify-content:space-between;gap:8px}
+  .sess-info .n time{font-size:11px;color:var(--muted);font-weight:400}
+  .sess-info .p{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+  .badge{background:var(--green);color:#04210f;font-size:11px;font-weight:700;border-radius:10px;padding:1px 7px;margin-left:6px}
+
+  /* ----- conversa ----- */
+  .chat{display:flex;flex-direction:column;min-width:0;background:
+    radial-gradient(900px 500px at 80% -10%,rgba(43,127,255,.10),transparent),
+    radial-gradient(700px 500px at 0% 110%,rgba(139,77,255,.10),transparent),var(--bg)}
+  .chat-head{display:flex;align-items:center;gap:12px;padding:16px 22px;border-bottom:1px solid var(--line);background:rgba(17,23,38,.6);backdrop-filter:blur(6px)}
+  .chat-head .n{font-weight:700}
+  .chat-head .s{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px}
+  .body{flex:1;overflow-y:auto;padding:22px;display:flex;flex-direction:column;gap:10px;min-height:0}
+  .empty{margin:auto;text-align:center;color:var(--muted);max-width:320px}
+  .empty .big{font-size:42px;margin-bottom:10px}
+
+  .msg{max-width:62%;padding:10px 14px;border-radius:14px;font-size:14px;line-height:1.45;
+    position:relative;animation:pop .25s ease both;word-wrap:break-word}
+  .msg time{display:block;font-size:10px;color:rgba(255,255,255,.55);margin-top:4px;text-align:right}
+  .msg.visitor{align-self:flex-start;background:var(--in);border-bottom-left-radius:4px}
+  .msg.admin{align-self:flex-end;background:var(--out);border-bottom-right-radius:4px}
+  @keyframes pop{from{opacity:0;transform:translateY(8px) scale(.98)}to{opacity:1;transform:none}}
+  .typing{align-self:flex-start;color:var(--muted);font-size:13px;font-style:italic}
+
+  .composer{display:flex;gap:10px;padding:16px 18px;border-top:1px solid var(--line);background:rgba(17,23,38,.6)}
+  .composer input{flex:1;padding:12px 16px;border-radius:24px;border:1px solid var(--line);
+    background:var(--panel);color:var(--txt);font-size:14px;outline:none}
+  .composer input:focus{border-color:var(--blue)}
+  .composer button{border:none;cursor:pointer;width:46px;height:46px;border-radius:50%;
+    background:var(--grad);color:#fff;display:grid;place-items:center}
+  .composer button:disabled{opacity:.4;cursor:not-allowed}
+  .composer svg{width:20px;height:20px}
+
+  /* status de conexão */
+  .conn{position:fixed;top:12px;right:14px;font-size:12px;padding:6px 12px;border-radius:20px;
+    background:var(--panel);border:1px solid var(--line);display:flex;align-items:center;gap:7px;z-index:9}
+
+  @media(max-width:760px){
+    .app{grid-template-columns:1fr}
+    .side{position:absolute;inset:0;z-index:5;width:100%}
+    .side.hidden{display:none}
+    .chat-head .back{display:inline-flex}
+  }
+  .back{display:none;cursor:pointer;background:none;border:none;color:var(--txt);font-size:20px;margin-right:4px}
+</style>
+</head>
+<body>
+<div class="conn" id="conn"><span class="dot off"></span><span id="connTxt">conectando…</span></div>
+
+<div class="app">
+  <!-- SIDEBAR: sessões ativas -->
+  <aside class="side" id="side">
+    <div class="brand">
+      <span class="wm">LD<span>CODE</span></span>
+      <span class="tag"><span class="dot" id="liveDot"></span> atendimento</span>
+    </div>
+    <div class="search"><input id="search" placeholder="Buscar visitante…"></div>
+    <div class="list-head">Sessões ativas</div>
+    <div class="sessions" id="sessions"></div>
+  </aside>
+
+  <!-- CONVERSA -->
+  <main class="chat">
+    <div class="chat-head" id="chatHead" style="display:none">
+      <button class="back" id="back">‹</button>
+      <div class="av" id="curAv">?</div>
+      <div>
+        <div class="n" id="curName">—</div>
+        <div class="s"><span class="dot off" id="curDot"></span><span id="curStatus">—</span></div>
+      </div>
+    </div>
+
+    <div class="body" id="body">
+      <div class="empty" id="empty">
+        <div class="big">💬</div>
+        <h3>Central de Atendimento LDCODE</h3>
+        <p>Selecione uma conversa à esquerda para responder em tempo real aos visitantes que estão no site.</p>
+      </div>
+    </div>
+
+    <form class="composer" id="composer" style="display:none">
+      <input id="text" placeholder="Escreva sua resposta…" autocomplete="off">
+      <button type="submit" aria-label="Enviar" id="send">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 20.5 21 12 3 3.5 3 10l13 2-13 2z"/></svg>
+      </button>
+    </form>
+  </main>
+</div>
+
+<!-- Socket.io client (servido pelo próprio servidor) -->
+<script src="/socket.io/socket.io.js"></script>
+<script>
+(function(){
+  'use strict';
+  var socket = io();              // mesma origem do servidor
+  var sessionsEl = document.getElementById('sessions');
+  var bodyEl     = document.getElementById('body');
+  var emptyEl    = document.getElementById('empty');
+  var headEl     = document.getElementById('chatHead');
+  var composer   = document.getElementById('composer');
+  var textEl     = document.getElementById('text');
+  var searchEl   = document.getElementById('search');
+  var connDot    = document.querySelector('#conn .dot');
+  var connTxt    = document.getElementById('connTxt');
+
+  var sessions = [];        // resumos vindos do servidor
+  var current  = null;      // sessionId aberto
+  var typingTimer = null;
+
+  /* ---------- conexão ---------- */
+  socket.on('connect', function(){
+    connDot.className = 'dot'; connTxt.textContent = 'conectado';
+    socket.emit('admin:join');
+  });
+  socket.on('disconnect', function(){
+    connDot.className = 'dot off'; connTxt.textContent = 'desconectado';
+  });
+
+  /* ---------- helpers ---------- */
+  function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function initials(name){return (name||'?').replace(/[^A-Za-zÀ-ú0-9]/g,' ').trim().split(/\s+/).slice(0,2).map(function(w){return w[0];}).join('').toUpperCase()||'?';}
+  function fmtTime(ts){var d=new Date(ts);return ('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2);}
+  function fmtAgo(ts){
+    var s=Math.floor((Date.now()-ts)/1000);
+    if(s<60)return 'agora';
+    if(s<3600)return Math.floor(s/60)+'min';
+    if(s<86400)return Math.floor(s/3600)+'h';
+    return Math.floor(s/86400)+'d';
+  }
+
+  /* ---------- lista de sessões ---------- */
+  var lastAudio = 0;
+  socket.on('admin:sessions', function(list){
+    var oldTotal = sessions.reduce(function(sum, s) { return sum + (s.unread || 0); }, 0);
+    sessions = list || [];
+    var newTotal = sessions.reduce(function(sum, s) { return sum + (s.unread || 0); }, 0);
+    
+    if (newTotal > oldTotal && (Date.now() - lastAudio > 1000)) {
+      lastAudio = Date.now();
+      try { new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3').play().catch(function(){}); } catch(e){}
+    }
+
+    renderSessions();
+    if(current){ // atualiza cabeçalho (online/offline)
+      var s = sessions.find(function(x){return x.id===current;});
+      if(s) updateHead(s);
+    }
+    window.parent.postMessage({ type: 'chat_unread', count: newTotal }, '*');
+  });
+
+  function renderSessions(){
+    var q = searchEl.value.trim().toLowerCase();
+    var rows = sessions.filter(function(s){return !q || (s.name||'').toLowerCase().indexOf(q)>-1 || (s.lastMessage||'').toLowerCase().indexOf(q)>-1;});
+    sessionsEl.innerHTML = '';
+    if(!rows.length){
+      sessionsEl.innerHTML = '<div style="padding:24px;color:var(--muted);font-size:13px;text-align:center">Nenhum visitante ainda.</div>';
+      return;
+    }
+    rows.forEach(function(s){
+      var div = document.createElement('div');
+      div.className = 'sess' + (s.id===current?' active':'');
+      div.onclick = function(){ openSession(s.id); };
+      div.innerHTML =
+        '<div class="av">'+esc(initials(s.name))+'<span class="pin'+(s.online?' on':'')+'"></span></div>'+
+        '<div class="sess-info">'+
+          '<div class="n">'+esc(s.name)+'<time>'+fmtAgo(s.lastSeen)+'</time></div>'+
+          '<div class="p">'+(s.lastFrom==='admin'?'Você: ':'')+esc(s.lastMessage||'—')+
+            (s.unread?'<span class="badge">'+s.unread+'</span>':'')+'</div>'+
+        '</div>';
+      sessionsEl.appendChild(div);
+    });
+  }
+  searchEl.addEventListener('input', renderSessions);
+
+  /* ---------- abrir conversa ---------- */
+  function openSession(id){
+    current = id;
+    socket.emit('admin:open', { sessionId: id });
+    renderSessions();
+    emptyEl.style.display = 'none';
+    headEl.style.display = 'flex';
+    composer.style.display = 'flex';
+    document.getElementById('side').classList.add('hidden'); // mobile
+    bodyEl.innerHTML = '<div class="empty" style="margin:auto;color:var(--muted)">Carregando…</div>';
+  }
+
+  function updateHead(s){
+    document.getElementById('curName').textContent = s.name;
+    document.getElementById('curAv').textContent = initials(s.name);
+    document.getElementById('curDot').className = 'dot' + (s.online?'':' off');
+    document.getElementById('curStatus').textContent = s.online ? 'online agora' : 'offline · visto '+fmtAgo(s.lastSeen);
+  }
+
+  socket.on('admin:history', function(data){
+    if(data.sessionId !== current) return;
+    var s = sessions.find(function(x){return x.id===current;});
+    if(s) updateHead(s); else { document.getElementById('curName').textContent = data.name; document.getElementById('curAv').textContent = initials(data.name); }
+    bodyEl.innerHTML = '';
+    (data.messages||[]).forEach(addBubble);
+    scrollDown();
+  });
+
+  /* ---------- nova mensagem (visitante ou eco do admin) ---------- */
+  socket.on('admin:message', function(data){
+    if(data.sessionId === current){
+      addBubble(data.message);
+      scrollDown();
+    }
+    // a lista é atualizada via admin:sessions
+  });
+
+  /* ---------- visitante digitando ---------- */
+  socket.on('admin:typing', function(data){
+    if(data.sessionId !== current) return;
+    showTyping();
+  });
+
+  function showTyping(){
+    removeTyping();
+    var t = document.createElement('div');
+    t.className = 'typing'; t.id='typing'; t.textContent = 'digitando…';
+    bodyEl.appendChild(t); scrollDown();
+    clearTimeout(showTyping._t);
+    showTyping._t = setTimeout(removeTyping, 3000);
+  }
+  function removeTyping(){var t=document.getElementById('typing');if(t)t.remove();}
+
+  function addBubble(m){
+    removeTyping();
+    var div = document.createElement('div');
+    div.className = 'msg ' + (m.from==='admin'?'admin':'visitor');
+    div.innerHTML = esc(m.text).replace(/\n/g,'<br>') + '<time>'+fmtTime(m.time)+'</time>';
+    bodyEl.appendChild(div);
+  }
+  function scrollDown(){ bodyEl.scrollTop = bodyEl.scrollHeight; }
+
+  /* ---------- enviar resposta ---------- */
+  composer.addEventListener('submit', function(e){
+    e.preventDefault();
+    var txt = textEl.value.trim();
+    if(!txt || !current) return;
+    socket.emit('admin:message', { sessionId: current, text: txt });
+    textEl.value = '';
+  });
+  textEl.addEventListener('input', function(){
+    if(!current) return;
+    clearTimeout(typingTimer);
+    socket.emit('admin:typing', { sessionId: current });
+  });
+
+  /* ---------- voltar (mobile) ---------- */
+  document.getElementById('back').onclick = function(){
+    document.getElementById('side').classList.remove('hidden');
+  };
+
+  // atualiza os "há quanto tempo" a cada 30s
+  setInterval(renderSessions, 30000);
+})();
+</script>
+</body>
+</html>

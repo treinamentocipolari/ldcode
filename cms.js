@@ -251,9 +251,28 @@
   SCHEMA.forEach(function (g) { g.fields.forEach(function (f) { FIELDS[f.key] = f; }); });
 
   /* ---------- store ---------- */
-  function load() { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { return {}; } }
-  function save(d) { try { localStorage.setItem(KEY, JSON.stringify(d)); } catch (e) {} }
-  var data = load();
+  function loadLocal() { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { return {}; } }
+  var data = loadLocal();
+
+  // Load from server
+  fetch('api/cms-data.json?v=' + new Date().getTime())
+    .then(function(r) { return r.json(); })
+    .then(function(serverData) {
+       if (serverData && Object.keys(serverData).length > 0) {
+          data = serverData;
+          try { localStorage.setItem(KEY, JSON.stringify(data)); } catch (e) {}
+          if (document.body && document.body.hasAttribute('data-ldsite')) applyToSite(document);
+       }
+    }).catch(function(e) { console.log('Server config missing or empty'); });
+
+  function save(d) { 
+    try { localStorage.setItem(KEY, JSON.stringify(d)); } catch (e) {} 
+    fetch('api/save.php', {
+       method: 'POST',
+       headers: { 'Content-Type': 'application/json' },
+       body: JSON.stringify(d)
+    }).catch(function(e) { console.log('Erro ao salvar no servidor'); });
+  }
 
   function get(k) { return (data[k] !== undefined && data[k] !== null) ? data[k] : (FIELDS[k] ? FIELDS[k].def : ''); }
   function isCustom(k) { return data[k] !== undefined && data[k] !== null && data[k] !== ''; }
@@ -335,7 +354,7 @@
     SCHEMA: SCHEMA, FIELDS: FIELDS, KEY: KEY,
     get: get, set: set, setAll: setAll, isCustom: isCustom,
     resetKey: resetKey, resetAll: resetAll, applyToSite: applyToSite,
-    reload: function () { data = load(); }
+    reload: function () { data = loadLocal(); }
   };
 
   /* auto-aplica no site (marcado com data-ldsite no <body>) */
