@@ -36,6 +36,4 @@ jobs:
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: ./dist/
-          server-dir: ./
-          # Se os arquivos estiverem em uma subpasta na HostGator (ex: public_html), altere o server-dir para:
-          # server-dir: public_html/
+          server-dir: ldcodepro.com.br/
